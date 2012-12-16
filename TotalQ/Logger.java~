@@ -1,0 +1,65 @@
+public reviser Logger extends BoundedTotalQueue{
+	Model model = Main.model;
+	
+	public Logger(int capacity){
+		super(capacity);
+	}
+	
+	public synchronized void enqMethod(Integer newItem){
+		//System.out.println("Enquing : "+newItem);
+		State preState=extractState();
+		boolean flag = true;
+		try{
+			super.enqMethod(newItem);
+		}catch(Exception ex){
+			flag = false;
+			ex.printStackTrace();
+		}finally{
+			if(flag){
+				State postState = extractState();
+				model.addTransition(preState,postState,"ENQ");
+			}
+		}
+	}
+
+	public  synchronized Integer deqMethod(){
+		//System.out.println("Dequing : ");		
+		State preState = extractState();
+		int retVal = -999;
+		boolean flag = true;
+		try{
+			retVal = super.deqMethod();			
+		}catch(Exception ex){
+			flag = false;
+			ex.printStackTrace();
+		}finally{
+			if(flag){
+				State postState = extractState();
+				model.addTransition(preState,postState,"DEQ");
+			}
+		}
+		return new Integer(retVal);
+	}
+
+	public int getCapacity(){
+		return this.capacity;
+	}
+
+	public int getSize(){
+		return this.size.get();
+	}
+	
+	public boolean isEmpty(){
+		return this.size.get() == 0? true : false;
+	}
+
+	public State extractState(){
+		State s = new State();
+		s.add("isEmpty",""+isEmpty());
+		s.add("size",""+getSize());
+		s.add("capacity",""+getCapacity());		
+	//	System.out.println("IsEmpty : "+s.isEmpty+"\tCapacity: "+s.capacity+"\tSize "+s.size);
+		return s;
+	}
+}
+
